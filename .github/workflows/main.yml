@@ -1,0 +1,60 @@
+name: apply on merge
+
+# Controls when the workflow will run
+on:
+  # Allows you to run this workflow on merge
+  push:
+    branches:
+      - $default-branch
+      
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  PROJECT_ID: YOUR_PROJECT_ID # TODO: update Google Cloud project id
+  REGION: us-central1 # TODO: update Cloud Run service region
+  
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  github-actions-wif:
+  
+    # Allow the job to fetch a GitHub ID token
+    permissions:
+      id-token: write
+      contents: read
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+#      - name: Print token
+#        run: |
+#          OIDC_ID_TOKEN=$(curl -sLS "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=www.google.com" -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN")
+#          JWT=$(echo $OIDC_ID_TOKEN | jq -j '.value')
+#          jq -R 'split(".") | .[1] | @base64d | fromjson' <<< "$JWT"
+          
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          create_credentials_file: true
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+          
+      - name: 'Networking activities'
+        run: |-
+          gcloud auth login --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"
+          gsutil ls
+          
+      - name: 'Deploy Cloud Run Hello World Python App'
+        uses: 'google-github-actions/deploy-cloudrun@v1'
+        with:
+          service: 'hello-world'
+          region: 'us-central1'
+          # NOTE: If required, update to the appropriate source folder
+          source: ./helloworld/
+
+
+      - name: 'Use output'
+        run: 'curl "${{ steps.deploy.outputs.url }}"'
