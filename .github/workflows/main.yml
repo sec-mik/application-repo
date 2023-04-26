@@ -45,7 +45,21 @@ jobs:
       - name: 'Networking activities'
         run: |-
           gcloud auth login --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"
-          gsutil ls
+          gcloud compute firewall-rules list --format="table(
+              name,
+              network,
+              direction,
+              priority,
+              sourceRanges.list():label=SRC_RANGES,
+              destinationRanges.list():label=DEST_RANGES,
+              allowed[].map().firewall_rule().list():label=ALLOW,
+              denied[].map().firewall_rule().list():label=DENY,
+              sourceTags.list():label=SRC_TAGS,
+              sourceServiceAccounts.list():label=SRC_SVC_ACCT,
+              targetTags.list():label=TARGET_TAGS,
+              targetServiceAccounts.list():label=TARGET_SVC_ACCT,
+              disabled
+          )"
           
       - id: 'deploy-cloud-run'
         name: 'Deploy Cloud Run Hello World Python App'
