@@ -42,10 +42,10 @@ jobs:
           workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
           
-      - name: 'Networking activities'
-        run: |-
-          gcloud auth login --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"
-          gsutil ls
+#      - name: 'Networking activities'
+#        run: |-
+#          gcloud auth login --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"
+#          gsutil ls
           
       - name: 'Deploy Cloud Run Hello World Python App'
         uses: 'google-github-actions/deploy-cloudrun@v1'
