@@ -28,11 +28,11 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-#      - name: Print token
-#        run: |
-#          OIDC_ID_TOKEN=$(curl -sLS "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=www.google.com" -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN")
-#          JWT=$(echo $OIDC_ID_TOKEN | jq -j '.value')
-#          jq -R 'split(".") | .[1] | @base64d | fromjson' <<< "$JWT"
+      - name: Print token
+        run: |
+          OIDC_ID_TOKEN=$(curl -sLS "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=www.google.com" -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN")
+          JWT=$(echo $OIDC_ID_TOKEN | jq -j '.value')
+          jq -R 'split(".") | .[1] | @base64d | fromjson' <<< "$JWT"
           
       - id: 'auth'
         name: 'Authenticate to Google Cloud'
@@ -42,10 +42,10 @@ jobs:
           workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
           
-#      - name: 'Networking activities'
-#        run: |-
-#          gcloud auth login --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"
-#          gsutil ls
+      - name: 'Networking activities'
+        run: |-
+          gcloud auth login --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"
+          gsutil ls
           
       - id: 'deploy-cloud-run'
         name: 'Deploy Cloud Run Hello World Python App'
