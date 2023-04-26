@@ -58,4 +58,4 @@ jobs:
 
 
       - name: 'Use output'
-        run: 'curl "${{ steps.deploy-cloud.run.outputs.url }}"'
+        run: 'curl "${{ steps.deploy-cloud-run.outputs.url }}"'
