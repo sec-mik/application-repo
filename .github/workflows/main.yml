@@ -60,6 +60,7 @@ jobs:
               targetServiceAccounts.list():label=TARGET_SVC_ACCT,
               disabled
           )"
+          continue-on-error: true
           
       - id: 'deploy-cloud-run'
         name: 'Deploy Cloud Run Hello World Python App'
