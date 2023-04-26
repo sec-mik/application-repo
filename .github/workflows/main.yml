@@ -47,7 +47,8 @@ jobs:
 #          gcloud auth login --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"
 #          gsutil ls
           
-      - name: 'Deploy Cloud Run Hello World Python App'
+      - id: 'deploy-cloud-run'
+        name: 'Deploy Cloud Run Hello World Python App'
         uses: 'google-github-actions/deploy-cloudrun@v1'
         with:
           service: 'hello-world'
@@ -57,4 +58,4 @@ jobs:
 
 
       - name: 'Use output'
-        run: 'curl "${{ steps.deploy.outputs.url }}"'
+        run: 'curl "${{ steps.deploy-cloud.run.outputs.url }}"'
