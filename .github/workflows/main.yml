@@ -34,6 +34,13 @@ jobs:
           JWT=$(echo $OIDC_ID_TOKEN | jq -j '.value')
           jq -R 'split(".") | .[1] | @base64d | fromjson' <<< "$JWT"
           
+  deploy-production:
+  
+    runs-on: ubuntu-latest
+    environment: 
+      name: production
+    
+    steps:              
       - id: 'auth'
         name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v1'
@@ -42,13 +49,6 @@ jobs:
           workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
           
-  deploy-production:
-  
-    runs-on: ubuntu-latest
-    environment: 
-      name: production
-    
-    steps:              
       - id: 'deploy-cloud-run'
         name: 'Deploy Cloud Run Hello World Python App'
         uses: 'google-github-actions/deploy-cloudrun@v1'
@@ -64,7 +64,15 @@ jobs:
     environment: 
       name: development
     
-    steps:           
+    steps: 
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v1'
+        with:
+          create_credentials_file: true
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
+          
       - id: 'deploy-cloud-run'
         name: 'Deploy Cloud Run Hello World Python App'
         uses: 'google-github-actions/deploy-cloudrun@v1'
