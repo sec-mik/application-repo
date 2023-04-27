@@ -36,7 +36,11 @@ jobs:
           jq -R 'split(".") | .[1] | @base64d | fromjson' <<< "$JWT"
           
   deploy-production:
-  
+      # Allow the job to fetch a GitHub ID token
+    permissions:
+      id-token: write
+      contents: read
+      
     runs-on: ubuntu-latest
     environment: 
       name: production
@@ -60,7 +64,11 @@ jobs:
           source: ./helloworld/
           
   deploy-development:
-  
+      # Allow the job to fetch a GitHub ID token
+    permissions:
+      id-token: write
+      contents: read
+      
     runs-on: ubuntu-latest
     environment: 
       name: development
