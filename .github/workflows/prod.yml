@@ -6,7 +6,6 @@ on:
   push:
     branches:
       - main
-        development
       
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -23,7 +22,10 @@ jobs:
     permissions:
       id-token: write
       contents: read
-
+      
+    environment:
+      name: production
+      
     runs-on: ubuntu-latest
 
     steps:
@@ -34,18 +36,7 @@ jobs:
           OIDC_ID_TOKEN=$(curl -sLS "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=www.google.com" -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN")
           JWT=$(echo $OIDC_ID_TOKEN | jq -j '.value')
           jq -R 'split(".") | .[1] | @base64d | fromjson' <<< "$JWT"
-          
-  deploy-production:
-    # Allow the job to fetch a GitHub ID token
-    permissions:
-      id-token: write
-      contents: read
-    needs: authenticate  
-    runs-on: ubuntu-latest
-    environment: 
-      name: production
-    
-    steps:              
+            
       - id: 'auth'
         name: 'Authenticate to Google Cloud'
         uses: 'google-github-actions/auth@v1'
@@ -62,33 +53,3 @@ jobs:
           region: 'us-central1'
           # NOTE: If required, update to the appropriate source folder
           source: ./helloworld/
-          
-  deploy-development:
-      # Allow the job to fetch a GitHub ID token
-    permissions:
-      id-token: write
-      contents: read
-    needs: authenticate  
-    runs-on: ubuntu-latest
-    environment: 
-      name: development
-    
-    steps: 
-      - id: 'auth'
-        name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v1'
-        with:
-          create_credentials_file: true
-          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
-          
-      - id: 'deploy-cloud-run'
-        name: 'Deploy Cloud Run Hello World Python App'
-        uses: 'google-github-actions/deploy-cloudrun@v1'
-        with:
-          service: 'hello-world'
-          region: 'us-central1'
-          # NOTE: If required, update to the appropriate source folder
-          source: ./helloworld/
-          tag: development
-          tag_traffic: 'my-tag=10'
