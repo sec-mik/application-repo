@@ -54,4 +54,4 @@ jobs:
           # NOTE: If required, update to the appropriate source folder
           source: ./helloworld/
           tag: development
-          tag_traffic: 'my-tag=10'
+          tag_traffic: 'development=10'
