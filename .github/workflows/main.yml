@@ -16,7 +16,7 @@ env:
   
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  github-actions-wif:
+  authenticate:
   
     # Allow the job to fetch a GitHub ID token
     permissions:
@@ -42,26 +42,13 @@ jobs:
           workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ secrets.SERVICE_ACCOUNT_EMAIL }}
           
-      - name: 'Networking activities'
-        run: |-
-          gcloud auth login --brief --cred-file="${{ steps.auth.outputs.credentials_file_path }}"
-          gcloud compute firewall-rules list --format="table(
-              name,
-              network,
-              direction,
-              priority,
-              sourceRanges.list():label=SRC_RANGES,
-              destinationRanges.list():label=DEST_RANGES,
-              allowed[].map().firewall_rule().list():label=ALLOW,
-              denied[].map().firewall_rule().list():label=DENY,
-              sourceTags.list():label=SRC_TAGS,
-              sourceServiceAccounts.list():label=SRC_SVC_ACCT,
-              targetTags.list():label=TARGET_TAGS,
-              targetServiceAccounts.list():label=TARGET_SVC_ACCT,
-              disabled
-          )"
-        continue-on-error: true
-          
+  deploy-production:
+  
+    runs-on: ubuntu-latest
+    environment: 
+      name: production
+    
+    steps:              
       - id: 'deploy-cloud-run'
         name: 'Deploy Cloud Run Hello World Python App'
         uses: 'google-github-actions/deploy-cloudrun@v1'
@@ -70,7 +57,21 @@ jobs:
           region: 'us-central1'
           # NOTE: If required, update to the appropriate source folder
           source: ./helloworld/
-
-
-      - name: 'Use output'
-        run: 'curl "${{ steps.deploy-cloud-run.outputs.url }}"'
+          
+  deploy-development:
+  
+    runs-on: ubuntu-latest
+    environment: 
+      name: development
+    
+    steps:           
+      - id: 'deploy-cloud-run'
+        name: 'Deploy Cloud Run Hello World Python App'
+        uses: 'google-github-actions/deploy-cloudrun@v1'
+        with:
+          service: 'hello-world'
+          region: 'us-central1'
+          # NOTE: If required, update to the appropriate source folder
+          source: ./helloworld/
+          tag: development
+          tag_traffic: 'my-tag=10'
